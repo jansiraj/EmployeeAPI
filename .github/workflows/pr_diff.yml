@@ -1,26 +1,29 @@
+name: PR Workflow
+
 on:
   pull_request:
-    types: [opened, synchronize]
-    branches: [main, develop]
+    branches:
+      - main  # adjust to your main branch name
 
 jobs:
-  scan_pr_diff:
+  send-diff-url:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v2
-        
-      - name: Get PR diff
-        id: pr_diff
-        run: echo "::set-output name=diff::$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})"
-      
-      - name: Send diff to Python scanner
-        run: python process_diff.py "${{ steps.pr_diff.outputs.diff }}" &
-      
-      - name: Send diff to webhook
+
+      - name: Get Diff URL
+        id: diff-url
         run: |
+          DIFF_URL=$(echo "${{ github.event.pull_request.diff_url }}")
+          echo "::set-output name=diff_url::$DIFF_URL"
+
+      - name: Send Diff URL to Flask API
+        run: |
+          DIFF_URL="${{ steps.diff-url.outputs.diff_url }}"
           curl -X POST \
-               -H "Content-Type: application/json" \
-               -d '{"diff": "${{ steps.pr_diff.outputs.diff }}"}' \
-               https://da8c-103-72-193-1.ngrok-free.app/workflows
+            -H "Content-Type: application/json" \
+            -d "{\"diff_url\": \"$DIFF_URL\"}" \
+            https://da8c-103-72-193-1.ngrok-free.app/workflows  
+
