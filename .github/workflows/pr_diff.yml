@@ -1,0 +1,26 @@
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main, develop]
+
+jobs:
+  scan_pr_diff:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Get PR diff
+        id: pr_diff
+        run: echo "::set-output name=diff::$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})"
+      
+      - name: Send diff to Python scanner
+        run: python process_diff.py "${{ steps.pr_diff.outputs.diff }}" &
+      
+      - name: Send diff to webhook
+        run: |
+          curl -X POST \
+               -H "Content-Type: application/json" \
+               -d '{"diff": "${{ steps.pr_diff.outputs.diff }}"}' \
+               https://da8c-103-72-193-1.ngrok-free.app/workflows
