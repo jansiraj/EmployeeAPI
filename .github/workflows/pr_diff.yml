@@ -6,24 +6,17 @@ on:
       - main  # adjust to your main branch name
 
 jobs:
-  send-diff-url:
+  send-pr-details:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Get Diff URL
-        id: diff-url
+      - name: Send PR details to Flask API
         run: |
-          DIFF_URL=$(echo "${{ github.event.pull_request.diff_url }}")
-          echo "::set-output name=diff_url::$DIFF_URL"
-
-      - name: Send Diff URL to Flask API
-        run: |
-          DIFF_URL="${{ steps.diff-url.outputs.diff_url }}"
+          PR_DETAILS=$(echo '${{ toJson(github.event.pull_request) }}')
           curl -X POST \
             -H "Content-Type: application/json" \
-            -d "{\"diff_url\": \"$DIFF_URL\"}" \
-            https://da8c-103-72-193-1.ngrok-free.app/workflows  
-
+            -d "$PR_DETAILS" \
+            https://da8c-103-72-193-1.ngrok-free.app/workflows
