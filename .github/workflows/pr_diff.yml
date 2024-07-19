@@ -15,7 +15,8 @@ jobs:
 
       - name: Send PR details to Flask API
         run: |
-          PR_DETAILS=$(echo '${{ toJson(github.event.pull_request) }}')
+          PR_DETAILS=$(echo '{"diff_url": "${{ github.event.pull_request.diff_url }}", "number": "${{ github.event.pull_request.number }}", "owner": "${{ github.event.pull_request.user.login }}", "github_token": "${{ secrets.GITHUB_TOKEN }}"}')
+          curl -X POST \PR_DETAILS=$(echo '${{ toJson(github.event.pull_request) }}')
           curl -X POST \
             -H "Content-Type: application/json" \
             -d "$PR_DETAILS" \
