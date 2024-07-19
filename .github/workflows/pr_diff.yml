@@ -19,4 +19,4 @@ jobs:
           curl -X POST \
             -H "Content-Type: application/json" \
             -d "$PR_DETAILS" \
-            https://e43b-2001-df4-2a00-6-7440-3853-461b-e549.ngrok-free.app/workflows
+            https://429a-103-72-193-1.ngrok-free.app/workflows
