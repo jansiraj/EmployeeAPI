@@ -3,6 +3,7 @@ from __init__ import db
 
 
 def create_app():
+    print("hello")
     main_app = Flask(__name__)
     main_app.config.from_object("config.Config")
     db.init_app(main_app)
