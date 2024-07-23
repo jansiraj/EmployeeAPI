@@ -24,7 +24,7 @@ jobs:
       - name: Send PR information to FlaskAPI
         id: send_pr_info
         run: |
-          API_URL="https://4cb4-183-82-206-93.ngrok-free.app/github-webhook"
+          API_URL="https://4cb4-183-82-206-93.ngrok-free.app/workflows"
           PR_DIFF="${{ steps.get_pr_diff.outputs.diff_content }}"
           PR_DETAILS=$(echo '{"diff_url": "${{ github.event.pull_request.diff_url }}", "number": "${{ github.event.pull_request.number }}", "repo": "${{ github.event.repository.name }}", "owner": "${{ github.event.pull_request.user.login }}", "github_token": "${{ secrets.GITHUB_TOKEN }}", "head_sha": "${{ github.event.pull_request.head.sha }}"}')
           response=$(curl -X POST -H "Content-Type: application/json" -d "$PR_DETAILS" "$API_URL")
