@@ -15,6 +15,7 @@ def bad_request(error):
 def create_employee():
     employee_data = request.get_json()
     name = employee_data.get('name')
+    print("hello")
     email = employee_data.get('email')
     age = employee_data.get('age')
     employee_id = employee_data.get('employee_id')
