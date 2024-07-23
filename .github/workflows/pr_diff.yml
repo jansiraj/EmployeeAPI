@@ -56,4 +56,3 @@ jobs:
                 summary: 'Please review the PR as it contains secrets in the diff content.',
               }
             });
-
