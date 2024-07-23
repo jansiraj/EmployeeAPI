@@ -2,8 +2,8 @@ name: Send PR and Check for "hello"
 
 on:
   pull_request:
-    branches: [main]
-    types: [opened, synchronize]
+    branches: 
+      - main
 
 jobs:
   send_pr_and_check_hello:
@@ -12,14 +12,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Retrieve PR diff
-        id: get_pr_diff
-        run: |
-          PR_URL="${{ steps.create_pr.outputs.pull-request-url }}"
-          PR_NUMBER=$(echo "$PR_URL" | awk -F'/' '{print $NF}')
-          diff_content=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3.diff" "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}")
-          echo "::set-output name=diff_content::$diff_content"
 
       - name: Send PR information to FlaskAPI
         id: send_pr_info
@@ -35,14 +27,12 @@ jobs:
         run: echo "Waiting for FlaskAPI response..."
 
       - name: Raise warning if secrets found
-        run: echo "${{ steps.wait_for_response.outputs.response }}"
-        run: echo "${{steps.send_pr_info.outputs.response}}"
         if: steps.send_pr_info.outputs.response == 'neutral'
         uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.checks.create({
+            github.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               name: 'Check Hello Content in PR Diff',
