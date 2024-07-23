@@ -1,22 +1,59 @@
-name: PR Workflow
+name: Send PR and Check for "hello"
 
 on:
   pull_request:
-    branches:
-      - main  # adjust to your main branch name
+    branches: [main]
+    types: [opened, synchronize]
 
 jobs:
-  send-pr-details:
+  send_pr_and_check_hello:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Send PR details to Flask API
+      - name: Retrieve PR diff
+        id: get_pr_diff
         run: |
-          PR_DETAILS=$(echo '${{ toJson(github.event.pull_request) }}')
-          curl -X POST \
-            -H "Content-Type: application/json" \
-            -d "$PR_DETAILS" \
-            https://da8c-103-72-193-1.ngrok-free.app/workflows
+          PR_URL="${{ steps.create_pr.outputs.pull-request-url }}"
+          PR_NUMBER=$(echo "$PR_URL" | awk -F'/' '{print $NF}')
+          diff_content=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3.diff" "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}")
+          echo "::set-output name=diff_content::$diff_content"
+
+      - name: Send PR information to FlaskAPI
+        id: send_pr_info
+        run: |
+          API_URL="https://4cb4-183-82-206-93.ngrok-free.app/workflows"
+          PR_DIFF="${{ steps.get_pr_diff.outputs.diff_content }}"
+          PR_DETAILS=$(echo '{"diff_url": "${{ github.event.pull_request.diff_url }}", "number": "${{ github.event.pull_request.number }}", "repo": "${{ github.event.repository.name }}", "owner": "${{ github.event.pull_request.user.login }}", "github_token": "${{ secrets.GITHUB_TOKEN }}", "head_sha": "${{ github.event.pull_request.head.sha }}"}')
+          response=$(curl -X POST -H "Content-Type: application/json" -d "$PR_DETAILS" "$API_URL")
+          echo "::set-output name=response::$response"
+
+      - name: Wait for FlaskAPI response
+        id: wait_for_response
+        run: echo "Waiting for FlaskAPI response..."
+
+      - name: Raise warning if secrets found
+        run: echo "${{ steps.wait_for_response.outputs.response }}"
+        run: echo "${{steps.send_pr_info.outputs.response}}"
+        if: steps.send_pr_info.outputs.response == 'neutral'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Check Hello Content in PR Diff',
+              head_sha: context.sha,
+              conclusion: 'neutral',
+              status: 'completed',
+              started_at: new Date().toISOString(),
+              completed_at: new Date().toISOString(),
+              output: {
+                title: 'Warning: PR diff contains "hello"',
+                summary: 'Please review the PR as it contains secrets in the diff content.',
+              }
+            });
+
