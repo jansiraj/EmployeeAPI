@@ -1,9 +1,9 @@
 name: Send PR and Check for "hello"
 
 on:
-  push:
-    branches:
-      - main  # Replace with your branch name
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
 
 jobs:
   send_pr_and_check_hello:
@@ -35,6 +35,8 @@ jobs:
         run: echo "Waiting for FlaskAPI response..."
 
       - name: Raise warning if secrets found
+        run: echo "${{ steps.wait_for_response.outputs.response }}"
+        run: echo "${{steps.send_pr_info.outputs.response}}"
         if: steps.send_pr_info.outputs.response == 'neutral'
         uses: actions/github-script@v5
         with:
