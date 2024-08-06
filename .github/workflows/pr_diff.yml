@@ -40,5 +40,27 @@ jobs:
       - name: Print conclusion
         run: echo "The conclusion is ${{ env.CONCLUSION }}"
 
+      - name: Raise warning if action required
+        if: ${{ env.CONCLUSION == 'action_required' }}
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('Warning: Action required!')
+            await github.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Check Hello Content in PR Diff',
+              head_sha: context.sha,
+              conclusion: 'neutral',
+              status: 'completed',
+              started_at: new Date().toISOString(),
+              completed_at: new Date().toISOString(),
+              output: {
+                title: 'Warning: PR diff contains "hello"',
+                summary: 'Please review the PR as it contains secrets in the diff content.',
+              }
+            });
+
 
       
