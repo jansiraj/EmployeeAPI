@@ -13,12 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Get PR Diff
+        id: get_pr_diff
+        run: |
+          PR_DIFF=$(curl -s "${{ github.event.pull_request.diff_url }}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}")
+          echo "PR_DIFF<<EOF" >> $GITHUB_ENV
+          echo "$PR_DIFF" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Send PR information to FlaskAPI
         id: send_pr_info
         run: |
           API_URL="https://chatty-nails-reply.loca.lt/workflows"
-          PR_DIFF="${{ steps.get_pr_diff.outputs.diff_content }}"
-          PR_DETAILS=$(echo '{"diff_url": "${{ github.event.pull_request.diff_url }}", "number": "${{ github.event.pull_request.number }}", "repo": "${{ github.event.repository.name }}", "owner": "${{ github.event.pull_request.user.login }}", "github_token": "${{ secrets.GITHUB_TOKEN }}", "head_sha": "${{ github.event.pull_request.head.sha }}"}')
+          PR_DETAILS=$(echo "{\"diff_url\": \"${{ github.event.pull_request.diff_url }}\", \"number\": \"${{ github.event.pull_request.number }}\", \"repo\": \"${{ github.event.repository.name }}\", \"owner\": \"${{ github.event.pull_request.user.login }}\", \"github_token\": \"${{ secrets.GITHUB_TOKEN }}\", \"head_sha\": \"${{ github.event.pull_request.head.sha }}\"}")
           response=$(curl -X POST -H "Content-Type: application/json" -d "$PR_DETAILS" "$API_URL")
           echo "response=$response" >> $GITHUB_ENV
 
@@ -27,8 +34,8 @@ jobs:
         run: echo "Waiting for FlaskAPI response..."
 
       - name: Print response
-        run: echo "The response is  ${{ env.response }}"
-        
+        run: echo "The response is ${{ env.response }}"
+
       - name: Raise warning if secrets found
         if: ${{ env.response == 'action_required' }}
         uses: actions/github-script@v5
@@ -36,12 +43,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             console.log('Warning: Action required!')
-            github.checks.create({
+            await github.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               name: 'Check Hello Content in PR Diff',
               head_sha: context.sha,
-              conclusion: 'neutral',
+              conclusion: 'neutral',  // Correct conclusion value
               status: 'completed',
               started_at: new Date().toISOString(),
               completed_at: new Date().toISOString(),
