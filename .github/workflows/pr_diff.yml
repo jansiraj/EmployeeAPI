@@ -36,24 +36,4 @@ jobs:
       - name: Print response
         run: echo "The response is ${{ env.response }}"
 
-      - name: Raise warning if secrets found
-        if: ${{ env.response == 'action_required' }}
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            console.log('Warning: Action required!')
-            await github.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Check Hello Content in PR Diff',
-              head_sha: context.sha,
-              conclusion: 'neutral',  // Correct conclusion value
-              status: 'completed',
-              started_at: new Date().toISOString(),
-              completed_at: new Date().toISOString(),
-              output: {
-                title: 'Warning: PR diff contains "hello"',
-                summary: 'Please review the PR as it contains secrets in the diff content.',
-              }
-            });
+      
