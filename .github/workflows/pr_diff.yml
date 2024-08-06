@@ -20,7 +20,7 @@ jobs:
           curl -s "${{ github.event.pull_request.diff_url }}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" > pr_diff.txt
           echo "PR diff content fetched."
 
-      - name: Send PR data to FlaskAPI
+      - name: Send PR information to FlaskAPI
         id: send_pr_info
         run: |
           echo "Sending PR information to FlaskAPI..."
@@ -28,24 +28,17 @@ jobs:
           PR_DETAILS=$(echo "{\"diff_url\": \"${{ github.event.pull_request.diff_url }}\", \"number\": \"${{ github.event.pull_request.number }}\", \"repo\": \"${{ github.event.repository.name }}\", \"owner\": \"${{ github.event.pull_request.user.login }}\", \"github_token\": \"${{ secrets.GITHUB_TOKEN }}\", \"head_sha\": \"${{ github.event.pull_request.head.sha }}\"}")
           RESPONSE=$(curl -X POST -H "Content-Type: application/json" -d "$PR_DETAILS" "$API_URL")
           echo "API response: $RESPONSE"
-          echo "response=$RESPONSE" >> $GITHUB_ENV
+          echo "$RESPONSE" > response.json
 
-      - name: Wait for FlaskAPI response datas
-        id: wait_for_response
-        run: echo "Waiting for FlaskAPI response..."
-
-      - name: Print response data
-        run: echo "The response is ${{ env.response }}"
-
-      - name: Check for "hello" in PR diff
+      - name: Parse API response
+        id: parse_response
         run: |
-          if grep -q "hello" pr_diff.txt; then
-            echo "PR diff contains 'hello'"
-            # Optionally, you can fail the job or take other actions
-            exit 1
-          else
-            echo "PR diff does not contain 'hello'"
-          fi
+          echo "Parsing API response..."
+          CONCLUSION=$(jq -r '.conclusion' response.json)
+          echo "CONCLUSION=$CONCLUSION" >> $GITHUB_ENV
+
+      - name: Print conclusion
+        run: echo "The conclusion is ${{ env.CONCLUSION }}"
 
 
       
