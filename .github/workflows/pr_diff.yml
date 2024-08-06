@@ -46,12 +46,17 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            console.log('Warning: Action required!')
-            await github.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            const { context } = require('@actions/github');
+            const { owner, repo } = context.repo;
+            const sha = context.sha;
+            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+
+            console.log('Warning: Action required!');
+            await octokit.checks.create({
+              owner,
+              repo,
               name: 'Check Hello Content in PR Diff',
-              head_sha: context.sha,
+              head_sha: sha,
               conclusion: 'neutral',
               status: 'completed',
               started_at: new Date().toISOString(),
