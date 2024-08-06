@@ -46,7 +46,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { context } = require('@actions/github');
+            const { github, context } = require('@actions/github');
             const { owner, repo } = context.repo;
             const sha = context.sha;
             const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
@@ -66,6 +66,5 @@ jobs:
                 summary: 'Please review the PR as it contains secrets in the diff content.',
               }
             });
-
 
       
