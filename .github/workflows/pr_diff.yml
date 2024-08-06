@@ -42,28 +42,24 @@ jobs:
 
       - name: Raise warning if action required
         if: ${{ env.CONCLUSION == 'action_required' }}
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { context } = require('@actions/github');
-            const { owner, repo } = context.repo;
-            const sha = context.sha;
-
-            console.log('Warning: Action required!');
-            await github.checks.create({
-              owner,
-              repo,
-              name: 'Check Hello Content in PR Diff',
-              head_sha: sha,
-              conclusion: 'neutral',
-              status: 'completed',
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head_sha: context.sha,
+              name: "my-check-name",
+              status: "completed",
               started_at: new Date().toISOString(),
               completed_at: new Date().toISOString(),
+              conclusion: "neutral",
               output: {
-                title: 'Warning: PR diff contains "hello"',
-                summary: 'Please review the PR as it contains secrets in the diff content.',
-              }
+                title: "my *check* title",
+                summary: "my *check* summary",
+                text: "my *check* text,
+              },
             });
 
       
