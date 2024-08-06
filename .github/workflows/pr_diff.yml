@@ -58,8 +58,7 @@ jobs:
               output: {
                 title: "my *check* title",
                 summary: "my *check* summary",
-                text: "my *check* text,
-              },
-            });
-
+                text: "my *check* text",
+              }
+            })
       
