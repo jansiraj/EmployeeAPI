@@ -20,21 +20,22 @@ jobs:
           PR_DIFF="${{ steps.get_pr_diff.outputs.diff_content }}"
           PR_DETAILS=$(echo '{"diff_url": "${{ github.event.pull_request.diff_url }}", "number": "${{ github.event.pull_request.number }}", "repo": "${{ github.event.repository.name }}", "owner": "${{ github.event.pull_request.user.login }}", "github_token": "${{ secrets.GITHUB_TOKEN }}", "head_sha": "${{ github.event.pull_request.head.sha }}"}')
           response=$(curl -X POST -H "Content-Type: application/json" -d "$PR_DETAILS" "$API_URL")
-          echo "response=$response" >> $GITHUB_OUTPUT
+          echo "response=$response" >> $GITHUB_ENV
 
       - name: Wait for FlaskAPI response
         id: wait_for_response
         run: echo "Waiting for FlaskAPI response..."
 
       - name: Print response
-        run: echo "The response is ${{ steps.send_pr_info.outputs.response }}"
+        run: echo "The response is  ${{ env.response }}"
         
       - name: Raise warning if secrets found
-        if: steps.send_pr_info.outputs.response == 'action_required'
+        if: ${{ env.response == 'action_required' }}
         uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            console.log('Warning: Action required!')
             github.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
