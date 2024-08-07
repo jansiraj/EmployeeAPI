@@ -28,15 +28,22 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
-            const apiUrl = 'https://4511-2001-df4-2a00-6-413b-9dfc-955e-26b0.ngrok-free.app/workflows'; // Replace with your API URL
+            const apiUrl = 'https://4511-2001-df4-2a00-6-413b-9dfc-955e-26b0.ngrok-free.app/workflows';
+            const diffUrl = '${{ github.event.pull_request.diff_url }}';
+            const number = '${{ github.event.pull_request.number }}';
+            const repo = '${{ github.event.repository.name }}';
+            const owner = '${{ github.event.pull_request.user.login }}';
+            const githubToken = '${{ secrets.GITHUB_TOKEN }}';
+            const headSha = '${{ github.event.pull_request.head.sha }}';
+
             const requestData = {
-              'diff_url': ${{ github.event.pull_request.diff_url }},
-              'number': ${{ github.event.pull_request.number }},
-              'repo': ${{ github.event.repository.name }},
-              'owner': ${{ github.event.pull_request.user.login }},
-              'github_token': ${{ secrets.GITHUB_TOKEN }},
-              'head_sha': ${{ github.event.pull_request.head.sha }}
-            }; // Replace with the data you want to send in the POST request
+              diff_url: diffUrl,
+              number: number,
+              repo: repo,
+              owner: owner,
+              github_token: githubToken,
+              head_sha: headSha
+            };
 
             try {
               const response = await axios.post(apiUrl, requestData);
