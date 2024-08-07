@@ -24,7 +24,7 @@ jobs:
         id: send_pr_info
         run: |
           echo "Sending PR information to FlaskAPI..."
-          API_URL="https://10.6.56.172:5050/workflows"
+          API_URL="https://4511-2001-df4-2a00-6-413b-9dfc-955e-26b0.ngrok-free.app/workflows"
           PR_DETAILS=$(echo "{\"diff_url\": \"${{ github.event.pull_request.diff_url }}\", \"number\": \"${{ github.event.pull_request.number }}\", \"repo\": \"${{ github.event.repository.name }}\", \"owner\": \"${{ github.event.pull_request.user.login }}\", \"github_token\": \"${{ secrets.GITHUB_TOKEN }}\", \"head_sha\": \"${{ github.event.pull_request.head.sha }}\"}")
           RESPONSE=$(curl -k -X POST -H "Content-Type: application/json" -d "$PR_DETAILS" "$API_URL")
           echo "API response: $RESPONSE"
