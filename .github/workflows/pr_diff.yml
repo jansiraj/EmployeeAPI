@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Get PR Diff
         id: get_pr_diff
@@ -20,46 +20,38 @@ jobs:
           curl -s "${{ github.event.pull_request.diff_url }}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" > pr_diff.txt
           echo "PR diff content fetched."
 
-      - name: Send PR information to FlaskAPI
-        id: send_pr_info
-        run: |
-          echo "Sending PR information to FlaskAPI..."
-          API_URL="https://4511-2001-df4-2a00-6-413b-9dfc-955e-26b0.ngrok-free.app/workflows"
-          PR_DETAILS=$(echo "{\"diff_url\": \"${{ github.event.pull_request.diff_url }}\", \"number\": \"${{ github.event.pull_request.number }}\", \"repo\": \"${{ github.event.repository.name }}\", \"owner\": \"${{ github.event.pull_request.user.login }}\", \"github_token\": \"${{ secrets.GITHUB_TOKEN }}\", \"head_sha\": \"${{ github.event.pull_request.head.sha }}\"}")
-          RESPONSE=$(curl -k -X POST -H "Content-Type: application/json" -d "$PR_DETAILS" "$API_URL")
-          echo "API response: $RESPONSE"
-          echo "$RESPONSE" > response.json
 
-      - name: Parse API response
-        id: parse_response
-        run: |
-          echo "Parsing API response..."
-          CONCLUSION=$(jq -r '.conclusion' response.json)
-          echo "CONCLUSION=$CONCLUSION" >> $GITHUB_ENV
-
-      - name: Print conclusion
-        run: echo "The conclusion is ${{ env.CONCLUSION }}"
-
-      - name: Raise warning if action required
-        if: ${{ env.CONCLUSION == 'action_required' }}
+      - name: Perform POST Request to Flask API
+        id: post_api
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const response = await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head_sha: context.sha,
-              name: "my-check-name",
-              status: "completed",
-              started_at: new Date().toISOString(),
-              completed_at: new Date().toISOString(),
-              conclusion: "failure",
-              output: {
-                title: "my *check* title",
-                summary: "my *check* summary",
-                text: "my *check* text",
+            const axios = require('axios');
+            const apiUrl = 'https://4511-2001-df4-2a00-6-413b-9dfc-955e-26b0.ngrok-free.app/workflows'; // Replace with your API URL
+            const requestData = {
+              'diff_url': ${{ github.event.pull_request.diff_url }},
+              'number': ${{ github.event.pull_request.number }},
+              'repo': ${{ github.event.repository.name }},
+              'owner': ${{ github.event.pull_request.user.login }},
+              'github_token': ${{ secrets.GITHUB_TOKEN }},
+              'head_sha': ${{ github.event.pull_request.head.sha }}
+            }; // Replace with the data you want to send in the POST request
+
+            try {
+              const response = await axios.post(apiUrl, requestData);
+              const data = response.data;
+
+              // Replace with your own logic to handle the response
+              if (data.status === 'error') {
+                core.setFailed(`API Error: ${data.message}`);
+              } else if (data.status === 'warning') {
+                console.log(`Warning: ${data.message}`);
+                core.warning(`Warning: ${data.message}`);
+                core.setFailed(`Warning: ${data.message}`});
+              } else {
+                console.log('API response is OK.');
               }
-            });
-            console.log('Check Run Response:', response.data);
-      
+            } catch (error) {
+              core.setFailed(`API request failed: ${error.message}`);
+            }
