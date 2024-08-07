@@ -55,7 +55,7 @@ jobs:
               } else if (data.status === 'warning') {
                 console.log(`Warning: ${data.message}`);
                 core.warning(`Warning: ${data.message}`);
-                core.setFailed(`Warning: ${data.message}`});
+                core.setFailed(`Warning: ${data.message}`);
               } else {
                 console.log('API response is OK.');
               }
