@@ -13,13 +13,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install axios
+        run: npm install axios
+
       - name: Get PR Diff
         id: get_pr_diff
         run: |
           echo "Fetching PR diff..."
           curl -s "${{ github.event.pull_request.diff_url }}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" > pr_diff.txt
           echo "PR diff content fetched."
-
 
       - name: Perform POST Request to Flask API
         id: post_api
