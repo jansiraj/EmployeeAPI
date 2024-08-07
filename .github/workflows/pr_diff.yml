@@ -32,7 +32,6 @@ jobs:
         id: post_api
         uses: actions/github-script@v6
         with:
-          node-version: '20'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
