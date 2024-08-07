@@ -44,10 +44,9 @@ jobs:
         if: ${{ env.CONCLUSION == 'action_required' }}
         uses: actions/github-script@v6
         with:
-          node-version: '14'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.rest.checks.create({
+            const response = await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head_sha: context.sha,
@@ -61,5 +60,6 @@ jobs:
                 summary: "my *check* summary",
                 text: "my *check* text",
               }
-            })
+            });
+            console.log('Check Run Response:', response.data);
       
