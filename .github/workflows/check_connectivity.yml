@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "Testing connectivity to ${{ github.event.inputs.url }} using method ${{ github.event.inputs.method }}"
 
-          curl -X ${{ github.event.inputs.method }} \
+          curl -X -k ${{ github.event.inputs.method }} \
             -H "Content-Type: application/json" \
             ${{ github.event.inputs.headers }} \
             -d ${{ github.event.inputs.data }} \
