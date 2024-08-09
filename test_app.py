@@ -14,6 +14,7 @@ class TestFlaskApi(unittest.TestCase):
 
     def setUp(self):
         self.app = main.app.test_client()
+        self.secrets = {"APIKey": "abc123def456ghi789jkl012mno345pqr678stuv901wxz234"}
         self.app.testing = True
 
     def test_post_success_response(self):
