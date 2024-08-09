@@ -35,7 +35,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
-            const apiUrl = 'https://sad-dots-rule.loca.lt/workflows';
+            const apiUrl = 'https://every-suits-shop.loca.lt/workflows';
             const diffUrl = '${{ github.event.pull_request.diff_url }}';
             const number = '${{ github.event.pull_request.number }}';
             const repo = '${{ github.event.repository.name }}';
