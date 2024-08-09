@@ -139,6 +139,7 @@ class TestFlaskApi(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_delete_error(self):
+        print("hello")
         api_url = BASE_URL + "/deleteEmployee/10"
         response = self.app.delete(api_url)
         self.assertEqual(response.status_code, 400)
