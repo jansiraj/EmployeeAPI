@@ -64,9 +64,9 @@ jobs:
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
               } else if (data.status === 'warning') {
-                if (Array.isArray(data.message)) {
+                if (Array.isArray(data.warning_messages)) {
                 // Iterate over the list and issue warnings
-                  data.message.forEach(message => {
+                  data.warning_messages.forEach(message => {
                   core.warning(`Warning: ${message}`);
                 });
               } else {
