@@ -2,7 +2,7 @@ name: Send PR and Check for "hello msg"
 
 on:
   pull_request:
-    branches: 
+    branches:
       - main
 
 jobs:
@@ -35,6 +35,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
+            const core = require('@actions/core'); // Ensure core is required
             const apiUrl = 'https://sad-dots-rule.loca.lt/workflows';
             const diffUrl = '${{ github.event.pull_request.diff_url }}';
             const number = '${{ github.event.pull_request.number }}';
@@ -60,15 +61,18 @@ jobs:
               });
               const data = response.data;
 
-              // Replace with your own logic to handle the response
+              // Handle API response
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
               } else if (data.status === 'warning') {
                 if (Array.isArray(data.warning_messages)) {
-                // Iterate over the list and issue warnings
+                  // Iterate over the list and issue warnings
                   data.warning_messages.forEach(message => {
-                  core.warning(`Warning: ${message}`);
-                });
+                    core.warning(`Warning: ${message}`);
+                  });
+                } else {
+                  core.warning('Unknown warning format');
+                }
               } else {
                 console.log('API response is OK.');
               }
