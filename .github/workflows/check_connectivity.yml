@@ -1,0 +1,39 @@
+name: Check HTTP Connectivity
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL to test connectivity'
+        required: true
+        default: 'https://example.com'
+      method:
+        description: 'HTTP method to use (GET, POST, etc.)'
+        required: false
+        default: 'GET'
+      headers:
+        description: 'Additional headers to include in the request'
+        required: false
+        default: ''
+      data:
+        description: 'Data to send in the request (for POST requests)'
+        required: false
+        default: ''
+
+jobs:
+  check_connectivity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check HTTP Connectivity
+        run: |
+          echo "Testing connectivity to ${{ github.event.inputs.url }} using method ${{ github.event.inputs.method }}"
+
+          curl -X ${{ github.event.inputs.method }} \
+            -H "Content-Type: application/json" \
+            ${{ github.event.inputs.headers }} \
+            -d ${{ github.event.inputs.data }} \
+            -v ${{ github.event.inputs.url }}
