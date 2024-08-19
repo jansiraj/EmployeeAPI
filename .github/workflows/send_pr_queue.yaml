@@ -1,0 +1,37 @@
+name: PR Diff to Queue
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  process-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Get PR diff
+      id: get_diff
+      run: |
+        PR_DIFF=$(gh pr diff ${{ github.event.pull_request.number }})
+        echo "PR_DIFF<<EOF" >> $GITHUB_ENV
+        echo "$PR_DIFF" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Send diff to RabbitMQ
+      env:
+        RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
+        RABBITMQ_USER: ${{ secrets.RABBITMQ_USER }}
+        RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+        RECEIVER_WEBHOOK_URL: ${{ secrets.RECEIVER_WEBHOOK_URL }}
+      run: |
+        curl -u $RABBITMQ_USER:$RABBITMQ_PASSWORD \
+          -X POST "$RABBITMQ_URL" \
+          -H "Content-Type: application/json" \
+          -d '{"diff": "'"$PR_DIFF"'"}'
+
+    - name: Notify on Failure
+      if: failure()
+      run: echo "Failed to send PR diff to RabbitMQ. Check logs for details."
