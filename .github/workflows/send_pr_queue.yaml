@@ -38,8 +38,8 @@ jobs:
             const tokenUrl = 'https://sat-ci.codebig2.net/v2/oauth/token';
             const headers = {
               'Content-Type': 'application/json',
-               X-Client-Secret: 'ccs-spider-xgitguard',
-               X-Client-ID: '3bd4ace7c97584e63c172d160aef1830'
+              'X-Client-Secret': 'ccs-spider-xgitguard',
+              'X-Client-ID': '3bd4ace7c97584e63c172d160aef1830'
             };
 
             axios.post(tokenUrl, {}, { headers })
@@ -72,6 +72,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+          try{
             const axios = require('axios');
             const apiUrl = 'https://0d2e-2406-7400-bd-328-95ad-996b-3b12-788c.ngrok-free.app/api/v1/xgg/queue/send_data';
             const diffUrl = '${{ github.event.pull_request.diff_url }}';
@@ -114,6 +115,7 @@ jobs:
                 core.setOutput('message', 'Diff data sent to the queue successfully');        
               } else {
                 console.log('API response is OK.');
+                }
             } catch (error) {
               core.setFailed(`API request failed: ${error.message}`);
             }
