@@ -1,7 +1,7 @@
 name: Send PR and Check for "hello msg"
 
 on:
-  pull_request:
+  push_datta:
     branches:
       - tick
 
