@@ -38,7 +38,7 @@ jobs:
             const tokenUrl = 'https://sat-ci.codebig2.net/v2/oauth/token';
             const headers = {
               'Content-Type': 'application/json',
-               X-Client-Secret: 'ccs-spider-xgitguard'
+               X-Client-Secret: 'ccs-spider-xgitguard',
                X-Client-ID: '3bd4ace7c97584e63c172d160aef1830'
             };
 
@@ -110,21 +110,10 @@ jobs:
               // Handle API response
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
-              } {else if (data.status == 'success'){
-                core.setOutput('message', 'Diff data sent to the queue successfully');
-                }
-              else if (data.status === 'warning') {
-                if (Array.isArray(data.warning_messages)) {
-                  // Iterate over the list and issue warnings
-                  data.warning_messages.forEach(message => {
-                    core.warning(`Warning: ${message}`);
-                  });
-                } else {
-                  core.warning('Unknown warning format');
-                }
+              } else if (data.status == 'success'){
+                core.setOutput('message', 'Diff data sent to the queue successfully');        
               } else {
                 console.log('API response is OK.');
-              }
             } catch (error) {
               core.setFailed(`API request failed: ${error.message}`);
             }
