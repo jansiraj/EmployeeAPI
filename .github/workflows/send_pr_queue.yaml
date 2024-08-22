@@ -35,7 +35,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
-            const core = require('@actions/core'); // Import core to use setOutput
 
             const tokenUrl = 'https://sat-ci.codebig2.net/v2/oauth/token'; // Replace with correct URL
             const headers = {
