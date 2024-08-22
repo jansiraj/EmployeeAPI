@@ -35,7 +35,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
-            const tokenUrl = 'https://sat-ci.codebig2.net/v2/oauth/token';
+            const core = require('@actions/core'); // Import core to use setOutput
+
+            const tokenUrl = 'https://sat-ci.codebig2.net/v2/oauth/token'; // Replace with correct URL
             const headers = {
               'Content-Type': 'application/json',
               'X-Client-Secret': 'ccs-spider-xgitguard',
@@ -55,11 +57,12 @@ jobs:
                   console.log(`Token Type: ${tokenType}`);
 
                   core.setOutput('sat_token', accessToken);
-                  echo "sat_token=${accessToken}" >> $GITHUB_ENV
-                  echo "scope=${scope}" >> $GITHUB_ENV
-                  echo "token_type=${tokenType}" >> $GITHUB_ENV;
+                  core.exportVariable('sat_token', accessToken); // Set environment variable
+                  core.exportVariable('scope', scope); // Set environment variable
+                  core.exportVariable('token_type', tokenType); // Set environment variable
                 } else {
                   console.log(`Unexpected status code: ${response.status}`);
+                  core.setFailed(`Unexpected status code: ${response.status}`);
                 }
               })
               .catch(error => {
