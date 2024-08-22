@@ -72,50 +72,50 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-          try{
-            const axios = require('axios');
-            const apiUrl = 'https://0d2e-2406-7400-bd-328-95ad-996b-3b12-788c.ngrok-free.app/api/v1/xgg/queue/send_data';
-            const diffUrl = '${{ github.event.pull_request.diff_url }}';
-            const number = '${{ github.event.pull_request.number }}';
-            const repo = '${{ github.event.repository.name }}';
-            const owner = '${{ github.event.pull_request.user.login }}';
-            const githubToken = '${{ secrets.GITHUB_TOKEN }}';
-            const headSha = '${{ github.event.pull_request.head.sha }}';
-            const satToken = '${{ env.sat_token }}';
-            const scope = '${{ env.scope }}';
-            const tokenType = '${{ env.token_type }}';
+            try{
+              const axios = require('axios');
+              const apiUrl = 'https://0d2e-2406-7400-bd-328-95ad-996b-3b12-788c.ngrok-free.app/api/v1/xgg/queue/send_data';
+              const diffUrl = '${{ github.event.pull_request.diff_url }}';
+              const number = '${{ github.event.pull_request.number }}';
+              const repo = '${{ github.event.repository.name }}';
+              const owner = '${{ github.event.pull_request.user.login }}';
+              const githubToken = '${{ secrets.GITHUB_TOKEN }}';
+              const headSha = '${{ github.event.pull_request.head.sha }}';
+              const satToken = '${{ env.sat_token }}';
+              const scope = '${{ env.scope }}';
+              const tokenType = '${{ env.token_type }}';
 
-            const headers = {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${satToken}`
-            };
+              const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${satToken}`
+              };
 
-            const requestData = {
-              diff_url: diffUrl,
-              number: number,
-              repo: repo,
-              owner: owner,
-              github_token: githubToken,
-              head_sha: headSha,
-              sat_token: satToken,
-              scope: scope,
-              token_type: tokenType
-            };
+              const requestData = {
+                diff_url: diffUrl,
+                number: number,
+                repo: repo,
+                owner: owner,
+                github_token: githubToken,
+                head_sha: headSha,
+                sat_token: satToken,
+                scope: scope,
+                token_type: tokenType
+              };
 
-            try {
-              const response = await axios.post(apiUrl, requestData, {
-                headers: headers
-              });
-              const data = response.data;
+              try {
+                const response = await axios.post(apiUrl, requestData, {
+                  headers: headers
+                });
+                const data = response.data;
 
-              // Handle API response
-              if (data.status === 'error') {
-                core.setFailed(`API Error: ${data.message}`);
-              } else if (data.status == 'success'){
-                core.setOutput('message', 'Diff data sent to the queue successfully');        
-              } else {
-                console.log('API response is OK.');
-                }
-            } catch (error) {
-              core.setFailed(`API request failed: ${error.message}`);
-            }
+                // Handle API response
+                if (data.status === 'error') {
+                  core.setFailed(`API Error: ${data.message}`);
+                } else if (data.status == 'success'){
+                  core.setOutput('message', 'Diff data sent to the queue successfully');        
+                } else {
+                  console.log('API response is OK.');
+                  }
+              } catch (error) {
+                core.setFailed(`API request failed: ${error.message}`);
+              }
