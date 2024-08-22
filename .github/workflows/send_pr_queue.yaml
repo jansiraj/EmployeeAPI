@@ -35,25 +35,49 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
+            const core = require('@actions/core'); // Import core for setting outputs and environment variables
 
             let config = {
               method: 'post',
               maxBodyLength: Infinity,
-              url: 'https://sat-ci.codebig2.net/v2/oauth/token',
+              url: 'https://sat-ci.codebig2.net/v2/oauth/token', // Replace with the actual URL
               headers: { 
                 'X-Client-Id': 'ccs-spider-xgitguard', 
-                'X-Client-Secret': '3bd4ace7c97584e63c172d160aef1830', 
+                'X-Client-Secret': '3bd4ace7c97584e63c172d160aef1830', // Replace with the actual secret
                 'Content-Type': 'application/json'
               }
             };
 
             axios.request(config)
-            .then((response) => {
-              console.log(JSON.stringify(response.data));
-            })
-            .catch((error) => {
-              console.log(error);
-            });
+              .then((response) => {
+                if (response.status === 200) {
+                  const data = response.data;
+                  const accessToken = data.access_token;
+                  const scope = data.scope;
+                  const tokenType = data.token_type;
+
+                  console.log(`Access Token: ${accessToken}`);
+                  console.log(`Scope: ${scope}`);
+                  console.log(`Token Type: ${tokenType}`);
+
+                  // Set outputs for future steps
+                  core.setOutput('sat_token', accessToken);
+                  core.setOutput('scope', scope);
+                  core.setOutput('token_type', tokenType);
+
+                  // Export environment variables for current step
+                  core.exportVariable('SAT_TOKEN', accessToken);
+                  core.exportVariable('SCOPE', scope);
+                  core.exportVariable('TOKEN_TYPE', tokenType);
+                } else {
+                  console.log(`Unexpected status code: ${response.status}`);
+                  core.setFailed(`Unexpected status code: ${response.status}`);
+                }
+              })
+              .catch((error) => {
+                console.log(`Error occurred: ${error.message}`);
+                core.setFailed(`Failed to get SAT token: ${error.message}`);
+              });
 
       - name: Perform POST Request to Flask API
         id: post_api
@@ -107,4 +131,6 @@ jobs:
                   }
               } catch (error) {
                 core.setFailed(`API request failed: ${error.message}`);
+              }catch (error) {
+                core.setFailed(`Unexpected error: ${error.message}`);
               }
