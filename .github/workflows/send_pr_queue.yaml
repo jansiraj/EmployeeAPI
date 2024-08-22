@@ -32,15 +32,14 @@ jobs:
         id: get_sat_token
         uses: actions/github-script@v7
         with:
-          X-Client-Secret: ${{ secrets.X-Client-Secret }}
-          X-Client-ID: ${{ secrets.X-Client-ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
             const tokenUrl = 'https://sat-ci.codebig2.net/v2/oauth/token';
             const headers = {
               'Content-Type': 'application/json',
-              'X-Client-ID': ${{ secrets.X-Client-ID }},
-              'X-Client-Secret': ${{ secrets.X-Client-Secret }}
+               X-Client-Secret: 'ccs-spider-xgitguard'
+               X-Client-ID: '3bd4ace7c97584e63c172d160aef1830'
             };
 
             axios.post(tokenUrl, {}, { headers })
