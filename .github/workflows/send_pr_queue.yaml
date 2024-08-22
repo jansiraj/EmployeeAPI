@@ -35,7 +35,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
-            const core = require('@actions/core'); // Import core for setting outputs and environment variables
 
             let config = {
               method: 'post',
