@@ -118,8 +118,8 @@ jobs:
               // Handle API response
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
-              } else if (data.status === 'warning') {
-                core.setOutput('message', 'Diff data sent to the queue successfully'); 
+              } else if (data.status === 'success') {
+                core.setOutput('message', ${data.message); 
               } else {
                 console.log('API response is OK.');
               }
