@@ -92,6 +92,7 @@ jobs:
             const repo = '${{ github.event.repository.name }}';
             const owner = '${{ github.event.pull_request.user.login }}';
             const githubToken = '${{ secrets.GITHUB_TOKEN }}';
+            const organization = '${{ github.repository_owner }}';
             const headSha = '${{ github.event.pull_request.head.sha }}';
             const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
             const scope = '${{ steps.get_sat_token.outputs.scope }}';
@@ -103,7 +104,8 @@ jobs:
               repo: repo,
               owner: owner,
               github_token: githubToken,
-              head_sha: headSha
+              head_sha: headSha,
+              organization: organization
             };
 
             try {
