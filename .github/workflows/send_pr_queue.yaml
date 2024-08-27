@@ -119,7 +119,7 @@ jobs:
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
               } else if (data.status === 'success') {
-                core.setOutput('message', ${data.message); 
+                core.setOutput('message', ${data.message}); 
               } else {
                 console.log('API response is OK.');
               }
