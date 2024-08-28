@@ -162,7 +162,7 @@ jobs:
             try {
               let data;
               do {
-                const response = await axios.post(apiUrl, requestData, {
+                const response = await axios.get(apiUrl, {
                   headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${satToken}`
@@ -212,7 +212,7 @@ jobs:
             };
 
             try {
-              const response = await axios.post(apiUrl, requestData, {
+              const response = await axios.get(apiUrl, {
                 headers: {
                   'Content-Type': 'application/json'
                 }
