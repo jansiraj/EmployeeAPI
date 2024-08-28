@@ -123,6 +123,7 @@ jobs:
               } else if (data.status === 'success') {
                 core.setOutput('message', 'Diff data sent to the queue successfully'); 
                 core.setOutput('scan_audit_id', data.scan_audit_id);
+                console.log(data.scan_audit_id);
               } else {
                 console.log('API response is OK.');
               }
@@ -191,7 +192,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const axios = require('axios');
-            const scanAuditId = '${{ steps.get_scan_status.outputs.scan_audit_id }}';
+            const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
             const apiUrl = 'https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/check_secrets/${scanAuditId}';
             const diffUrl = '${{ github.event.pull_request.diff_url }}';
             const number = '${{ github.event.pull_request.number }}';
