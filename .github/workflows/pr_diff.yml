@@ -131,6 +131,12 @@ jobs:
               core.setFailed(`API request failed: ${error.message}`);
             }
 
+      - name: Print scan_audit_id and apiUrl
+        id: print_scan_audit_id
+        run: |
+          echo "scan_audit_id: ${{ steps.get_scan_status.outputs.scan_audit_id }}"
+          echo "apiUrl: https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.get_scan_status.outputs.scan_audit_id }}"
+
       - name: Check for scan status
         id: get_scan_status
         uses: actions/github-script@v7
@@ -158,8 +164,6 @@ jobs:
               github_token: githubToken,
               head_sha: headSha
             };
-            echo "scan_audit_id: ${{ steps.get_scan_status.outputs.scan_audit_id }}"
-            echo "apiUrl: https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.get_scan_status.outputs.scan_audit_id }}"
 
             const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
             try {
