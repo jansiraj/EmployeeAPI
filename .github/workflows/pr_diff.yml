@@ -199,10 +199,9 @@ jobs:
               // Handle API response
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
-              } {else if (data.status == 'success'){
+              } else if (data.status == 'success'){
                 core.setOutput('message', 'No secrets found');
-                }
-              else if (data.status === 'warning') {
+              } else if (data.status === 'warning') {
                 if (Array.isArray(data.warning_messages)) {
                   // Iterate over the list and issue warnings
                   data.warning_messages.forEach(message => {
