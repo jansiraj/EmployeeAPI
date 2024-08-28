@@ -3,7 +3,7 @@ name: Send PR and Check for Secrets
 on:
   pull_request:
     branches:
-      - main
+      - tick
 
 jobs:
   send_pr_and_check_hello:
@@ -170,49 +170,6 @@ jobs:
                   await delay(10000); // Wait for 10 seconds before the next API call
                 }
               } while (res.data.status !== 'Completed');
-            } catch (error) {
-              core.setFailed(`API request failed: ${error.message}`);
-            }
-
-      - name: Check for secrets
-        id: check_secrets
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const axios = require('axios');
-            const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const apiUrl = 'https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/check_secrets/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
-
-
-            try {
-              const response = await axios.get(apiUrl, {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${satToken}`
-                }
-              });
-              const data = response.data;
-              console.log(data);
-
-              // Handle API response
-              if (data.status === 'error') {
-                core.setFailed(`API Error: ${data.message}`);
-              } else if (data.status == 'success'){
-                core.setOutput('message', 'No secrets found');
-              } else if (data.status === 'warning') {
-                if (Array.isArray(data.warning_messages)) {
-                  // Iterate over the list and issue warnings
-                  data.warning_messages.forEach(message => {
-                    core.warning(`Warning: ${message}`);
-                  });
-                } else {
-                  core.warning('Unknown warning format');
-                }
-              } else {
-                console.log('API response is OK.');
-              }
             } catch (error) {
               core.setFailed(`API request failed: ${error.message}`);
             }
