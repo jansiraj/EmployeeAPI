@@ -158,6 +158,8 @@ jobs:
               github_token: githubToken,
               head_sha: headSha
             };
+            echo "scan_audit_id: ${{ steps.get_scan_status.outputs.scan_audit_id }}"
+            echo "apiUrl: https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.get_scan_status.outputs.scan_audit_id }}"
 
             const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
             try {
