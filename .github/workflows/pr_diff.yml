@@ -159,15 +159,17 @@ jobs:
                   }
                 });
                 res = response.data;
+                console.log(res);
+                console.log(res.data.status);
 
                 // Handle API response
-                if (res.data.status === 'completed') {
+                if (res.data.status === 'Completed') {
                   console.log('API response is completed.');
                 } else {
                   console.log('API response is not completed. Retrying in 10 seconds...');
                   await delay(10000); // Wait for 10 seconds before the next API call
                 }
-              } while (res.data.status !== 'completed');
+              } while (res.data.status !== 'Completed');
             } catch (error) {
               core.setFailed(`API request failed: ${error.message}`);
             }
