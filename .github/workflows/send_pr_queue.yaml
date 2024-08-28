@@ -3,7 +3,7 @@ name: Send PR and Check for Secrets
 on:
   pull_request:
     branches:
-      - main
+      - mainsss
 
 jobs:
   send_pr_and_check_hello:
