@@ -3,7 +3,7 @@ name: Send PR and Check for Secrets
 on:
   pull_request:
     branches:
-      - mainsss
+      - main
 
 jobs:
   send_pr_and_check_hello:
@@ -78,8 +78,8 @@ jobs:
                 core.setFailed(`Failed to get SAT token: ${error.message}`);
               });
 
-      - name: Perform POST Request to Flask API
-        id: post_api
+      - name: Send PR Diff to Queue
+        id: send_pr_diff_queue
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -92,10 +92,10 @@ jobs:
             const repo = '${{ github.event.repository.name }}';
             const owner = '${{ github.event.pull_request.user.login }}';
             const githubToken = '${{ secrets.GITHUB_TOKEN }}';
-            const organization = '${{ github.repository_owner }}';
             const headSha = '${{ github.event.pull_request.head.sha }}';
             const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
             const scope = '${{ steps.get_sat_token.outputs.scope }}';
+            const organization = '${{ github.repository_owner }}';
             const tokenType = '${{ steps.get_sat_token.outputs.token_type }}'; // Removed the extra quote
 
             const requestData = {
@@ -120,8 +120,96 @@ jobs:
               // Handle API response
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
-              } else if (data.status === 'warning') {
+              } else if (data.status === 'success') {
                 core.setOutput('message', 'Diff data sent to the queue successfully'); 
+                core.setOutput('scan_audit_id', data.scan_audit_id);
+                console.log(data.scan_audit_id);
+              } else {
+                console.log('API response is OK.');
+              }
+            } catch (error) {
+              core.setFailed(`API request failed: ${error.message}`);
+            }
+
+      - name: Print scan_audit_id and apiUrl
+        id: print_scan_audit_id
+        run: |
+          echo "scan_audit_id: ${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
+          echo "apiUrl: https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
+
+      - name: Check for scan status
+        id: get_scan_status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const axios = require('axios');
+            const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const apiUrl = 'https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
+
+            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+            try {
+              let res;
+              do {
+                const response = await axios.get(apiUrl, {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${satToken}`
+                  }
+                });
+                res = response.data;
+                console.log(res);
+                console.log(res.data.status);
+
+                // Handle API response
+                if (res.data.status === 'Completed') {
+                  console.log('API response is completed.');
+                } else {
+                  console.log('API response is not completed. Retrying in 10 seconds...');
+                  await delay(10000); // Wait for 10 seconds before the next API call
+                }
+              } while (res.data.status !== 'Completed');
+            } catch (error) {
+              core.setFailed(`API request failed: ${error.message}`);
+            }
+
+      - name: Check for secrets
+        id: check_secrets
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const axios = require('axios');
+            const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const apiUrl = 'https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/check_secrets/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
+
+
+            try {
+              const response = await axios.get(apiUrl, {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${satToken}`
+                }
+              });
+              const data = response.data;
+              console.log(data);
+
+              // Handle API response
+              if (data.status === 'error') {
+                core.setFailed(`API Error: ${data.message}`);
+              } else if (data.status == 'success'){
+                core.setOutput('message', 'No secrets found');
+              } else if (data.status === 'warning') {
+                if (Array.isArray(data.warning_messages)) {
+                  // Iterate over the list and issue warnings
+                  data.warning_messages.forEach(message => {
+                    core.warning(`Warning: ${message}`);
+                  });
+                } else {
+                  core.warning('Unknown warning format');
+                }
               } else {
                 console.log('API response is OK.');
               }
