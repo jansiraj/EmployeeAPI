@@ -181,28 +181,14 @@ jobs:
             const axios = require('axios');
             const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
             const apiUrl = 'https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/check_secrets/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const diffUrl = '${{ github.event.pull_request.diff_url }}';
-            const number = '${{ github.event.pull_request.number }}';
-            const repo = '${{ github.event.repository.name }}';
-            const owner = '${{ github.event.pull_request.user.login }}';
-            const githubToken = '${{ secrets.GITHUB_TOKEN }}';
-            const headSha = '${{ github.event.pull_request.head.sha }}';
             const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
-            const scanAuditId = '${{ steps.get_scan_status.outputs.scan_audit_id }}';
 
-            const requestData = {
-              diff_url: diffUrl,
-              number: number,
-              repo: repo,
-              owner: owner,
-              github_token: githubToken,
-              head_sha: headSha
-            };
 
             try {
               const response = await axios.get(apiUrl, {
                 headers: {
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${satToken}`
                 }
               });
               const data = response.data;
