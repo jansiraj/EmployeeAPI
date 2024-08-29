@@ -209,6 +209,7 @@ jobs:
                   });
                 } else {
                   core.warning('Unknown warning format');
+                 core.setFailed(`Secrets found`);
                 }
               } else {
                 console.log('API response is OK.');
