@@ -194,7 +194,6 @@ jobs:
                 }
               });
               const data = response.data;
-              console.log(data);
 
               // Handle API response
               if (data.status === 'error') {
