@@ -207,6 +207,7 @@ jobs:
                   data.warning_messages.forEach(message => {
                     core.warning(`Warning: ${message}`);
                   });
+                  core.setFailed(`Secrets found in PR`);
                 } else {
                   core.warning('Unknown warning format');
                  core.setFailed(`Secrets found`);
