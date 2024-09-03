@@ -86,7 +86,7 @@ jobs:
           script: |
             const axios = require('axios');
 
-            const apiUrl = 'https://9215-183-82-207-156.ngrok-free.app/api/v1/xgg/queue/send_data';
+            const apiUrl = 'https://dd2e-183-82-207-156.ngrok-free.app/api/v1/xgg/queue/send_data';
             const diffUrl = '${{ github.event.pull_request.diff_url }}';
             const number = '${{ github.event.pull_request.number }}';
             const repo = '${{ github.event.repository.name }}';
@@ -135,7 +135,7 @@ jobs:
         id: print_scan_audit_id
         run: |
           echo "scan_audit_id: ${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
-          echo "apiUrl: https://9215-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
+          echo "apiUrl: https://dd2e-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
 
       - name: Check for scan status
         id: get_scan_status
@@ -145,7 +145,7 @@ jobs:
           script: |
             const axios = require('axios');
             const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const apiUrl = 'https://9215-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const apiUrl = 'https://dd2e-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
             const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
 
             const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -182,7 +182,7 @@ jobs:
           script: |
             const axios = require('axios');
             const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const apiUrl = 'https://9215-183-82-207-156.ngrok-free.app/api/v1/xgg/check_secrets/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const apiUrl = 'https://dd2e-183-82-207-156.ngrok-free.app/api/v1/xgg/check_secrets/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
             const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
 
 
