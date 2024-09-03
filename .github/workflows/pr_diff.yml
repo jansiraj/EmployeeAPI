@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  send_pr_and_check_hello:
+  send_pr_diff_and_check_for_secrets:
     runs-on: ubuntu-latest
 
     steps:
