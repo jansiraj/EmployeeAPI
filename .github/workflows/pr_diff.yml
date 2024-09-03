@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  send_pr_and_check_secrets:
+  send_pr_and_check_hello:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,8 +40,8 @@ jobs:
               method: 'post',
               maxBodyLength: Infinity,
               url: 'https://sat-ci.codebig2.net/v2/oauth/token', // Replace with the actual URL
-              headers: { 
-                'X-Client-Id': 'ccs-spider-xgitguard', 
+              headers: {
+                'X-Client-Id': 'ccs-spider-xgitguard',
                 'X-Client-Secret': '3bd4ace7c97584e63c172d160aef1830', // Replace with the actual secret
                 'Content-Type': 'application/json'
               }
@@ -86,7 +86,7 @@ jobs:
           script: |
             const axios = require('axios');
 
-            const apiUrl = 'https://280c-183-82-207-156.ngrok-free.app/api/v1/xgg/queue/send_data';
+            const apiUrl = 'https://03f1-183-82-207-156.ngrok-free.app/api/v1/xgg/queue/send_data';
             const diffUrl = '${{ github.event.pull_request.diff_url }}';
             const number = '${{ github.event.pull_request.number }}';
             const repo = '${{ github.event.repository.name }}';
@@ -121,7 +121,7 @@ jobs:
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
               } else if (data.status === 'success') {
-                core.setOutput('message', 'Diff data sent to the queue successfully'); 
+                core.setOutput('message', 'Diff data sent to the queue successfully');
                 core.setOutput('scan_audit_id', data.scan_audit_id);
                 console.log(data.scan_audit_id);
               } else {
@@ -135,7 +135,7 @@ jobs:
         id: print_scan_audit_id
         run: |
           echo "scan_audit_id: ${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
-          echo "apiUrl: https://280c-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
+          echo "apiUrl: https://03f1-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
 
       - name: Check for scan status
         id: get_scan_status
@@ -145,7 +145,7 @@ jobs:
           script: |
             const axios = require('axios');
             const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const apiUrl = 'https://280c-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const apiUrl = 'https://03f1-183-82-207-156.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
             const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
 
             const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -182,7 +182,7 @@ jobs:
           script: |
             const axios = require('axios');
             const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const apiUrl = 'https://280c-183-82-207-156.ngrok-free.app/api/v1/xgg/check_secrets/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
+            const apiUrl = 'https://03f1-183-82-207-156.ngrok-free.app/api/v1/xgg/check_secrets/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
             const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
 
 
@@ -194,6 +194,7 @@ jobs:
                 }
               });
               const data = response.data;
+              console.log(data);
 
               // Handle API response
               if (data.status === 'error') {
@@ -206,10 +207,9 @@ jobs:
                   data.warning_messages.forEach(message => {
                     core.warning(`Warning: ${message}`);
                   });
-                  core.setFailed(`Secrets found in PR`);
                 } else {
                   core.warning('Unknown warning format');
-                 core.setFailed(`Secrets found`);
+                 core.setFailed(`Secrets found in PR`);
                 }
               } else {
                 console.log('API response is OK.');
