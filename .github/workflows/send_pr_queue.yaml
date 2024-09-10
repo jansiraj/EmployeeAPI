@@ -3,7 +3,7 @@ name: Send PR and Check for Secrets
 on:
   pull_request:
     branches:
-      - tick
+      - main
 
 jobs:
   send_pr_and_check_hello:
@@ -40,8 +40,8 @@ jobs:
               method: 'post',
               maxBodyLength: Infinity,
               url: 'https://sat-ci.codebig2.net/v2/oauth/token', // Replace with the actual URL
-              headers: { 
-                'X-Client-Id': 'ccs-spider-xgitguard', 
+              headers: {
+                'X-Client-Id': 'ccs-spider-xgitguard',
                 'X-Client-Secret': '3bd4ace7c97584e63c172d160aef1830', // Replace with the actual secret
                 'Content-Type': 'application/json'
               }
@@ -86,7 +86,7 @@ jobs:
           script: |
             const axios = require('axios');
 
-            const apiUrl = 'https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/queue/send_data';
+            const apiUrl = 'https://03f1-183-82-207-156.ngrok-free.app/api/v1/xgg/queue/send_data';
             const diffUrl = '${{ github.event.pull_request.diff_url }}';
             const number = '${{ github.event.pull_request.number }}';
             const repo = '${{ github.event.repository.name }}';
@@ -121,7 +121,7 @@ jobs:
               if (data.status === 'error') {
                 core.setFailed(`API Error: ${data.message}`);
               } else if (data.status === 'success') {
-                core.setOutput('message', 'Diff data sent to the queue successfully'); 
+                core.setOutput('message', 'Diff data sent to the queue successfully');
                 core.setOutput('scan_audit_id', data.scan_audit_id);
                 console.log(data.scan_audit_id);
               } else {
@@ -131,45 +131,4 @@ jobs:
               core.setFailed(`API request failed: ${error.message}`);
             }
 
-      - name: Print scan_audit_id and apiUrl
-        id: print_scan_audit_id
-        run: |
-          echo "scan_audit_id: ${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
-          echo "apiUrl: https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}"
-
-      - name: Check for scan status
-        id: get_scan_status
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const axios = require('axios');
-            const scanAuditId = '${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const apiUrl = 'https://713a-2001-df4-2a00-6-41f9-61d4-3dc1-b97d.ngrok-free.app/api/v1/xgg/secret_scan/status/${{ steps.send_pr_diff_queue.outputs.scan_audit_id }}';
-            const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
-
-            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-            try {
-              let res;
-              do {
-                const response = await axios.get(apiUrl, {
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${satToken}`
-                  }
-                });
-                res = response.data;
-                console.log(res);
-                console.log(res.data.status);
-
-                // Handle API response
-                if (res.data.status === 'Completed') {
-                  console.log('API response is completed.');
-                } else {
-                  console.log('API response is not completed. Retrying in 10 seconds...');
-                  await delay(10000); // Wait for 10 seconds before the next API call
-                }
-              } while (res.data.status !== 'Completed');
-            } catch (error) {
-              core.setFailed(`API request failed: ${error.message}`);
-            }
+      
