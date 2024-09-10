@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   send_pr_diff_and_check_for_secrets:
     runs-on: ubuntu-latest
