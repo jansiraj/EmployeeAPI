@@ -1,136 +1,36 @@
-name: Send PR and Check for Secrets
+name: Fetch Diff Data
 
 on:
   pull_request:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  pull-requests: read
+    types: [opened, synchronize]
 
 jobs:
-  send_pr_diff_and_check_for_secrets:
+  fetch-diff:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+    - name: Get Diff Data
+      id: get_diff
+      run: |
+        # Fetch the PR number from the GitHub event context
+        PR_NUMBER=19
+        # GitHub API token
+        GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install axios
-        run: npm install axios
+        # Fetch diff data using the GitHub API
+        curl -H "Authorization: token $GITHUB_TOKEN" \
+             -H "Accept: application/vnd.github.v3.diff" \
+             https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+             > diff.txt
 
-      - name: Get PR Diff
-        id: get_pr_diff
-        run: |
-          echo "Fetching PR diff..."
-          curl -s "${{ github.event.pull_request.diff_url }}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" > pr_diff.txt
-          echo "PR diff content fetched."
+        # Print diff to the log (for debugging purposes)
+        cat diff.txt
 
-      - name: Get sat_token
-        id: get_sat_token
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const axios = require('axios');
-
-            let config = {
-              method: 'post',
-              maxBodyLength: Infinity,
-              url: 'https://sat-ci.codebig2.net/v2/oauth/token', // Replace with the actual URL
-              headers: {
-                'X-Client-Id': 'ccs-spider-xgitguard',
-                'X-Client-Secret': '3bd4ace7c97584e63c172d160aef1830', // Replace with the actual secret
-                'Content-Type': 'application/json'
-              }
-            };
-
-            axios.request(config)
-              .then((response) => {
-                if (response.status === 200) {
-                  const data = response.data;
-                  const accessToken = data.access_token;
-                  const scope = data.scope;
-                  const tokenType = data.token_type;
-
-                  console.log(`Access Token: ${accessToken}`);
-                  console.log(`Scope: ${scope}`);
-                  console.log(`Token Type: ${tokenType}`);
-
-                  // Set outputs for future steps
-                  core.setOutput('sat_token', accessToken);
-                  core.setOutput('scope', scope);
-                  core.setOutput('token_type', tokenType);
-
-                  // Export environment variables for current step
-                  core.exportVariable('SAT_TOKEN', accessToken);
-                  core.exportVariable('SCOPE', scope);
-                  core.exportVariable('TOKEN_TYPE', tokenType);
-                } else {
-                  console.log(`Unexpected status code: ${response.status}`);
-                  core.setFailed(`Unexpected status code: ${response.status}`);
-                }
-              })
-              .catch((error) => {
-                console.log(`Error occurred: ${error.message}`);
-                core.setFailed(`Failed to get SAT token: ${error.message}`);
-              });
-
-      - name: Send PR Diff to Queue
-        id: send_pr_diff_queue
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const axios = require('axios');
-
-            const apiUrl = 'https://d748-2001-df4-2a00-6-8c2-63b2-88bf-b78f.ngrok-free.app/api/v1/xgg/queue/send_data';
-            const diffUrl = '${{ github.event.pull_request.diff_url }}';
-            const number = '${{ github.event.pull_request.number }}';
-            const repo = '${{ github.event.repository.name }}';
-            const owner = '${{ github.event.pull_request.user.login }}';
-            const githubToken = '${{ secrets.GITHUB_TOKEN }}';
-            const headSha = '${{ github.event.pull_request.head.sha }}';
-            const satToken = '${{ steps.get_sat_token.outputs.sat_token }}';
-            const scope = '${{ steps.get_sat_token.outputs.scope }}';
-            const organization = '${{ github.repository_owner }}';
-            const tokenType = '${{ steps.get_sat_token.outputs.token_type }}'; // Removed the extra quote
-
-            const requestData = {
-              diff_url: diffUrl,
-              number: number,
-              repo: repo,
-              owner: owner,
-              github_token: githubToken,
-              head_sha: headSha,
-              organization: organization
-            };
-
-            try {
-              const response = await axios.post(apiUrl, requestData, {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${satToken}`
-                }
-              });
-              const data = response.data;
-
-              // Handle API response
-              if (data.status === 'error') {
-                core.setFailed(`API Error: ${data.message}`);
-              } else if (data.status === 'success') {
-                core.setOutput('message', 'Diff data sent to the queue successfully');
-                core.setOutput('scan_audit_id', data.scan_audit_id);
-                console.log(data.scan_audit_id);
-              } else {
-                console.log('API response is OK.');
-              }
-            } catch (error) {
-              core.setFailed(`API request failed: ${error.message}`);
-            }
+    - name: Upload Diff Data
+      uses: actions/upload-artifact@v3
+      with:
+        name: diff-data
+        path: diff.txt
