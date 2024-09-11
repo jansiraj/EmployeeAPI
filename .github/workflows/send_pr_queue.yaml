@@ -2,8 +2,8 @@ name: Fetch Diff Data
 
 on:
   pull_request:
-    types: [opened, synchronize]
-
+    branches:
+      - main
 jobs:
   fetch-diff:
     runs-on: ubuntu-latest
