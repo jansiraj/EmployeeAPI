@@ -3,7 +3,7 @@ name: Send PR and Check for Secrets
 on:
   pull_request:
     branches:
-      - mainss
+      - main
 
 jobs:
   send_pr_diff_and_check_for_secrets:
@@ -87,7 +87,7 @@ jobs:
             const axios = require('axios');
 
             const apiUrl = 'https://e6a1-183-82-207-156.ngrok-free.app/api/v1/xgg/queue/send_data';
-            const diffUrl = '${{ github.event.pull_request.diff_url }}';
+            const diffUrl = 'https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}';
             const number = '${{ github.event.pull_request.number }}';
             const repo = '${{ github.event.repository.name }}';
             const owner = '${{ github.event.pull_request.user.login }}';
