@@ -26,8 +26,7 @@ jobs:
              https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
              > diff.txt
 
-        cat ${{ secrets.GITHUB_TOKEN }}
-
+        echo "Your GitHub Token is: $GITHUB_TOKEN"
         # Print diff to the log (for debugging purposes)
         cat diff.txt
 
