@@ -5,6 +5,8 @@ from __init__ import db
 def create_app():
     print("hello")
     main_app = Flask(__name__)
+    #abc.com
+    password="jansi@1223232323"
     main_app.config.from_object("config.Config")
     db.init_app(main_app)
     from employee import employee as employee_blueprint
