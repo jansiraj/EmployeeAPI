@@ -6,6 +6,7 @@ def create_app():
     print("hello")
     main_app = Flask(__name__)
     #abc.com
+    password="1234sdfg*"
     password="jansi@123"
     main_app.config.from_object("config.Config")
     db.init_app(main_app)
